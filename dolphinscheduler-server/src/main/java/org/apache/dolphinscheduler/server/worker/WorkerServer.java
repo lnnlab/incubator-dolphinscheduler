@@ -129,6 +129,10 @@ public class WorkerServer implements IStoppable {
      * @param args arguments
      */
     public static void main(String[] args) {
+    	System.setProperty("spring.profiles.active","worker");
+    	System.setProperty("server", "server=worker-server");
+    	
+    	System.out.println(System.getProperty("server"));
         Thread.currentThread().setName(Constants.THREAD_NAME_WORKER_SERVER);
         new SpringApplicationBuilder(WorkerServer.class).web(WebApplicationType.NONE).run(args);
     }

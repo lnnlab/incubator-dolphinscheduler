@@ -292,10 +292,11 @@ public class SqlTask extends AbstractTask {
                 }
             }
 
-            try (PreparedStatement  stmt = prepareStatementAndBind(connection, mainSqlBinds);
-                 ResultSet resultSet = stmt.executeQuery()) {
+            try (PreparedStatement  stmt = prepareStatementAndBind(connection, mainSqlBinds))  {
+            	
                 // decide whether to executeQuery or executeUpdate based on sqlType
                 if (sqlParameters.getSqlType() == SqlType.QUERY.ordinal()) {
+                	 ResultSet resultSet = stmt.executeQuery();
                     // query statements need to be convert to JsonArray and inserted into Alert to send
                     JSONArray resultJSONArray = new JSONArray();
                     ResultSetMetaData md = resultSet.getMetaData();
@@ -328,7 +329,9 @@ public class SqlTask extends AbstractTask {
                     stmt.executeUpdate();
                     exitStatusCode = 0;
                 }
-            }
+            } 	
+           
+           
 
             for (SqlBinds sqlBind: postStatementsBinds) {
                 try (PreparedStatement stmt = prepareStatementAndBind(connection, sqlBind)) {
@@ -360,7 +363,8 @@ public class SqlTask extends AbstractTask {
         // is the timeout set
         boolean timeoutFlag = taskProps.getTaskTimeoutStrategy() == TaskTimeoutStrategy.FAILED ||
                 taskProps.getTaskTimeoutStrategy() == TaskTimeoutStrategy.WARNFAILED;
-        try (PreparedStatement  stmt = connection.prepareStatement(sqlBinds.getSql())) {
+        PreparedStatement  stmt = connection.prepareStatement(sqlBinds.getSql());
+        {
             if(timeoutFlag){
                 stmt.setQueryTimeout(taskProps.getTaskTimeout());
             }

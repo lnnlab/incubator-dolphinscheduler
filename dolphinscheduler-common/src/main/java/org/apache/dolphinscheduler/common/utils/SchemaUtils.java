@@ -46,7 +46,7 @@ public class SchemaUtils {
 	@SuppressWarnings("unchecked")
 	public static List<String> getAllSchemaList() {
 		List<String> schemaDirList = new ArrayList<>();
-		File[] schemaDirArr = FileUtils.getAllDir("sql/upgrade");
+		File[] schemaDirArr = FileUtils.getAllDir("../sql/upgrade");
 		if(schemaDirArr == null || schemaDirArr.length == 0) {
 			return null;
 		}
