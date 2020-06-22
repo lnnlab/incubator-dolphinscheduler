@@ -16,9 +16,11 @@
  */
 package org.apache.dolphinscheduler.api.interceptor;
 
+import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.security.Authenticator;
 import org.apache.dolphinscheduler.api.service.SessionService;
 import org.apache.dolphinscheduler.common.Constants;
+import org.apache.dolphinscheduler.common.enums.Flag;
 import org.apache.dolphinscheduler.dao.entity.User;
 import org.apache.dolphinscheduler.dao.mapper.UserMapper;
 import org.apache.commons.httpclient.HttpStatus;
@@ -27,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -86,18 +87,16 @@ public class LoginHandlerInterceptor implements HandlerInterceptor {
         return false;
       }
     }
+
+    // check user state
+    if (user.getState() == Flag.NO.ordinal()) {
+      response.setStatus(HttpStatus.SC_UNAUTHORIZED);
+      logger.info(Status.USER_DISABLED.getMsg());
+      return false;
+    }
+
     request.setAttribute(Constants.SESSION_USER, user);
     return true;
-  }
-
-  @Override
-  public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-
-  }
-
-  @Override
-  public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-
   }
 
 }

@@ -24,7 +24,7 @@ import org.apache.dolphinscheduler.common.Constants;
 import org.apache.dolphinscheduler.common.enums.*;
 import org.apache.dolphinscheduler.common.model.Server;
 import org.apache.dolphinscheduler.common.utils.DateUtils;
-import org.apache.dolphinscheduler.common.utils.JSONUtils;
+import org.apache.dolphinscheduler.common.utils.*;
 import org.apache.dolphinscheduler.common.utils.StringUtils;
 import org.apache.dolphinscheduler.dao.entity.ProcessDefinition;
 import org.apache.dolphinscheduler.dao.entity.Project;
@@ -92,7 +92,7 @@ public class SchedulerService extends BaseService {
      * @param processInstancePriority process instance priority
      * @param receivers receivers
      * @param receiversCc receivers cc
-     * @param workerGroupId worker group id
+     * @param workerGroup worker group
      * @return create result code
      * @throws IOException ioexception
      */
@@ -106,7 +106,7 @@ public class SchedulerService extends BaseService {
                                               String receivers,
                                               String receiversCc,
                                               Priority processInstancePriority,
-                                              int workerGroupId) throws IOException {
+                                              String workerGroup) throws IOException {
 
         Map<String, Object> result = new HashMap<String, Object>(5);
 
@@ -156,7 +156,7 @@ public class SchedulerService extends BaseService {
         scheduleObj.setUserName(loginUser.getUserName());
         scheduleObj.setReleaseState(ReleaseState.OFFLINE);
         scheduleObj.setProcessInstancePriority(processInstancePriority);
-        scheduleObj.setWorkerGroupId(workerGroupId);
+        scheduleObj.setWorkerGroup(workerGroup);
         scheduleMapper.insert(scheduleObj);
 
         /**
@@ -165,6 +165,9 @@ public class SchedulerService extends BaseService {
         processDefinition.setReceivers(receivers);
         processDefinition.setReceiversCc(receiversCc);
         processDefinitionMapper.updateById(processDefinition);
+
+        // return scheduler object with ID
+        result.put(Constants.DATA_LIST, scheduleMapper.selectById(scheduleObj.getId()));
         putMsg(result, Status.SUCCESS);
 
         result.put("scheduleId", scheduleObj.getId());
@@ -182,7 +185,7 @@ public class SchedulerService extends BaseService {
      * @param warningType warning type
      * @param warningGroupId warning group id
      * @param failureStrategy failure strategy
-     * @param workerGroupId worker group id
+     * @param workerGroup worker group
      * @param processInstancePriority process instance priority
      * @param receiversCc receiver cc
      * @param receivers receivers
@@ -202,7 +205,7 @@ public class SchedulerService extends BaseService {
                                               String receiversCc,
                                               ReleaseState scheduleStatus,
                                               Priority processInstancePriority,
-                                              int workerGroupId) throws IOException {
+                                              String workerGroup) throws IOException {
         Map<String, Object> result = new HashMap<String, Object>(5);
 
         Project project = projectMapper.queryByName(projectName);
@@ -266,7 +269,7 @@ public class SchedulerService extends BaseService {
         if (scheduleStatus != null) {
             schedule.setReleaseState(scheduleStatus);
         }
-        schedule.setWorkerGroupId(workerGroupId);
+        schedule.setWorkerGroup(workerGroup);
         schedule.setUpdateTime(now);
         schedule.setProcessInstancePriority(processInstancePriority);
         scheduleMapper.updateById(schedule);
@@ -365,6 +368,7 @@ public class SchedulerService extends BaseService {
 
         if (masterServers.size() == 0) {
             putMsg(result, Status.MASTER_NOT_EXISTS);
+            return result;
         }
 
         // set status

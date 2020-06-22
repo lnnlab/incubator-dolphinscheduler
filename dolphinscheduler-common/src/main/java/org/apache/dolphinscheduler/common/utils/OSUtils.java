@@ -53,9 +53,21 @@ public class OSUtils {
   private static final SystemInfo SI = new SystemInfo();
   public static final String TWO_DECIMAL = "0.00";
 
+  /**
+   * return -1 when the function can not get hardware env info
+   * e.g {@link OSUtils#loadAverage()} {@link OSUtils#cpuUsage()}
+   */
+  public static final double NEGATIVE_ONE = -1;
+
   private static HardwareAbstractionLayer hal = SI.getHardware();
 
   private OSUtils() {}
+
+  /**
+   * Initialization regularization, solve the problem of pre-compilation performance,
+   * avoid the thread safety problem of multi-thread operation
+   */
+  private static final Pattern PATTERN = Pattern.compile("\\s+");
 
 
   /**
@@ -112,9 +124,11 @@ public class OSUtils {
    */
   public static double loadAverage() {
     double loadAverage =  hal.getProcessor().getSystemLoadAverage();
+    if (Double.isNaN(loadAverage)) {
+      return NEGATIVE_ONE;
+    }
 
     DecimalFormat df = new DecimalFormat(TWO_DECIMAL);
-
     df.setRoundingMode(RoundingMode.HALF_UP);
     return Double.parseDouble(df.format(loadAverage));
   }
@@ -127,10 +141,12 @@ public class OSUtils {
   public static double cpuUsage() {
     CentralProcessor processor = hal.getProcessor();
     double cpuUsage = processor.getSystemCpuLoad();
+    if (Double.isNaN(cpuUsage)) {
+      return NEGATIVE_ONE;
+    }
 
     DecimalFormat df = new DecimalFormat(TWO_DECIMAL);
     df.setRoundingMode(RoundingMode.HALF_UP);
-
     return Double.parseDouble(df.format(cpuUsage));
   }
 
@@ -219,8 +235,7 @@ public class OSUtils {
 
     List<String> users = new ArrayList<>();
     while (startPos <= endPos) {
-      Pattern pattern = Pattern.compile("\\s+");
-      users.addAll(Arrays.asList(pattern.split(lines[startPos])));
+      users.addAll(Arrays.asList(PATTERN.split(lines[startPos])));
       startPos++;
     }
 
@@ -313,7 +328,7 @@ public class OSUtils {
       String currentProcUserName = System.getProperty("user.name");
       String result = exeCmd(String.format("net user \"%s\"", currentProcUserName));
       String line = result.split("\n")[22];
-      String group = Pattern.compile("\\s+").split(line)[1];
+      String group = PATTERN.split(line)[1];
       if (group.charAt(0) == '*') {
         return group.substring(1);
       } else {
@@ -352,13 +367,7 @@ public class OSUtils {
 
       return sb.toString();
     } finally {
-      if (br != null) {
-        try {
-          br.close();
-        } catch (Exception e) {
-          logger.error(e.getMessage(), e);
-        }
-      }
+      IOUtils.closeQuietly(br);
     }
   }
 
@@ -394,14 +403,12 @@ public class OSUtils {
     return null;
   }
 
-
   /**
    * whether is macOS
    * @return true if mac
    */
   public static boolean isMacOS() {
-    String os = System.getProperty("os.name");
-    return os.startsWith("Mac");
+    return getOSName().startsWith("Mac");
   }
 
 
@@ -410,22 +417,31 @@ public class OSUtils {
    * @return true if windows
    */
   public static boolean isWindows() {
-    String os = System.getProperty("os.name");
-    return os.startsWith("Windows");
+    return getOSName().startsWith("Windows");
+  }
+
+  /**
+   * get current OS name
+   * @return current OS name
+   */
+  public static String getOSName() {
+    return System.getProperty("os.name");
   }
 
   /**
    * check memory and cpu usage
+   * @param systemCpuLoad systemCpuLoad
+   * @param systemReservedMemory systemReservedMemory
    * @return check memory and cpu usage
    */
   public static Boolean checkResource(double systemCpuLoad, double systemReservedMemory){
-    // judging usage
+    // system load average
     double loadAverage = OSUtils.loadAverage();
-    //
+    // system available physical memory
     double availablePhysicalMemorySize = OSUtils.availablePhysicalMemorySize();
 
     if(loadAverage > systemCpuLoad || availablePhysicalMemorySize < systemReservedMemory){
-      logger.warn("load or availablePhysicalMemorySize(G) is too high, it's availablePhysicalMemorySize(G):{},loadAvg:{}", availablePhysicalMemorySize , loadAverage);
+      logger.warn("load is too high or availablePhysicalMemorySize(G) is too low, it's availablePhysicalMemorySize(G):{},loadAvg:{}", availablePhysicalMemorySize , loadAverage);
       return false;
     }else{
       return true;

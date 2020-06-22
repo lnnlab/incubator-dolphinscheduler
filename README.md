@@ -17,7 +17,7 @@ Dolphin Scheduler Official Website
 
 ### Design features:
 
-A distributed and easy-to-expand visual DAG workflow scheduling system. Dedicated to solving the complex dependencies in data processing, making the scheduling system `out of the box` for data processing.
+A distributed and easy-to-extend visual DAG workflow scheduling system. Dedicated to solving the complex dependencies in data processing, making the scheduling system `out of the box` for data processing.
 Its main objectives are as follows:
 
  - Associate the Tasks according to the dependencies of the tasks in a DAG graph, which can visualize the running state of task in real time.
@@ -80,7 +80,7 @@ Welcome to participate in contributing, please refer to the process of submittin
 ### How to Build
 
 ```bash
-mvn clean install -Prelease
+./mvnw clean install -Prelease
 ```
 
 Artifact:
@@ -99,9 +99,9 @@ It is because of the shoulders of these open source projects that the birth of t
 ### Get Help
 1. Submit an issue
 1. Subscribe the mail list : https://dolphinscheduler.apache.org/en-us/docs/development/subscribe.html.  then send mail to dev@dolphinscheduler.apache.org
+1. Slack channel: [![Slack Status](https://img.shields.io/badge/slack-join_chat-white.svg?logo=slack&style=social)](https://join.slack.com/share/zt-do3gvfhj-UUhrAX2GxkVX_~JJt1jpKA)
 1. Contact WeChat(dailidong66). This is just for Mandarin(CN) discussion.
 
 ### License
 Please refer to [LICENSE](https://github.com/apache/incubator-dolphinscheduler/blob/dev/LICENSE) file.
-
 

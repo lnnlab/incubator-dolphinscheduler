@@ -18,7 +18,7 @@ package org.apache.dolphinscheduler.api.controller;
 
 import org.apache.dolphinscheduler.api.enums.Status;
 import org.apache.dolphinscheduler.api.utils.Result;
-import org.apache.dolphinscheduler.common.utils.JSONUtils;
+import org.apache.dolphinscheduler.common.utils.*;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * users controller test
  */
 public class UsersControllerTest extends AbstractControllerTest{
-    private static Logger logger = LoggerFactory.getLogger(QueueControllerTest.class);
+    private static Logger logger = LoggerFactory.getLogger(UsersControllerTest.class);
 
     @Test
     public void testCreateUser() throws Exception {
